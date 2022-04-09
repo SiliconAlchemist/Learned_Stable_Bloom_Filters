@@ -1,9 +1,10 @@
 import mmh3
+from random import sample
 
 
 class stable_bloom_filter(object):
     
-    def __init__(m,Mx,K):
+    def __init__(self,m,Mx,K):
         '''
         m: Number of Cells in the bloom filter
         Mx: Maximum value a cell can hold
@@ -19,37 +20,41 @@ class stable_bloom_filter(object):
         self.P=5
         self.filter=[0]*self.m
         
-    def is_duplicate(item):
+    def is_duplicate(self,item):
         '''
         item: input item
         
         returns if the input item is already contained within the filter
         '''
         flag=True
-        hashes=get_hashes()
+        hashes=self.get_hashes(item)
         for i in range(self.K):
-            if(hashes[i]==0):
+            if(self.filter[hashes[i]]==0):
                 flag=False
 
-        remove_random_elements()
-        add_item(item)
+        self.remove_random_elements()
+        self.add_element(hashes)
         return flag
     
-    def add_element(item):
+    def add_element(self,hashes):
         '''
-        item: input item
-        
+        hashes: keys by K hash functions
         Adds an element to the filter by setting all the hash cells to max
         '''
-        pass
+        for i in range(self.K):
+            self.filter[hashes[i]]=self.Mx
+        
     
-    def remove_random_elements():
+    def remove_random_elements(self):
         '''
         Decrement random P cells by 1.
         '''
-        pass
+        cell_ind=[i for i in range(self.m)]
+        rem_ind=sample(cell_ind,self.P)
+        for i in rem_ind:
+            self.filter[i]=max(0,self.filter[i]-1)
     
-    def get_hashes(item):
+    def get_hashes(self,item):
         '''
         item: input item
         
@@ -58,8 +63,13 @@ class stable_bloom_filter(object):
         hashes = []
         
         for i in range(self.K):
-            hash_val = mmh3.hash(item, i) % self.N
+            hash_val = mmh3.hash(item, i) % self.m
             hashes.append(hash_val)
         
         return hashes
 
+if __name__=="__main__":
+    sbf=stable_bloom_filter(10,3,2)
+    while(True):
+        item=input()
+        print(sbf.is_duplicate(item))
