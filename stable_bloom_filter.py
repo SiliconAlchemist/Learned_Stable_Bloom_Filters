@@ -1,3 +1,6 @@
+import mmh3
+
+
 class stable_bloom_filter(object):
     
     def __init__(N,Mx,K):
@@ -38,10 +41,17 @@ class stable_bloom_filter(object):
         '''
         pass
     
-    def get_hashes():
+    def get_hashes(item):
         '''
         item: input item
         
         returns K hashes derived from k independent hash functions
         '''
-        pass
+        hashes = []
+        
+        for i in range(self.K):
+            hash_val = mmh3.hash(item, i) % self.N
+            hashes.append(hash_val)
+        
+        return hashes
+
